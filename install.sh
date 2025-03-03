@@ -9,15 +9,14 @@ else
     exit 1
 fi
 
-current_directory=$(pwd)
-INSTALL_DIR="/usr/local/bin"
+CURRENT_DIRECTORY=$(pwd)
 
 echo "Making '$SCRIPT_FILE' an executable..."
 chmod +x "$SCRIPT_FILE"
 
-echo "Creating a soft link in '$INSTALL_DIR'..."
-sudo rm -f "$INSTALL_DIR/$NEW_COMMAND"
-sudo ln -s "$current_directory/$SCRIPT_FILE" "$INSTALL_DIR/$NEW_COMMAND"
+echo "Creating a soft link in '$INSTALL_DIRECTORY'..."
+sudo rm -f "$INSTALL_DIRECTORY/$NEW_COMMAND"
+sudo ln -s "$CURRENT_DIRECTORY/$SCRIPT_FILE" "$INSTALL_DIRECTORY/$NEW_COMMAND"
 
 echo "Making command '$NEW_COMMAND' accesible in this terminal session..."
 hash -r

@@ -1,5 +1,11 @@
+# ------------------------------------------
+# This file is imported inside a few files
+# ------------------------------------------
+
 # Run install.sh if you change name of command
 NEW_COMMAND="stimer"
+INSTALL_DIRECTORY="/usr/local/bin"
+SCRIPT_FILE="sound-timer.sh"
 
 # Sound files
 SOUND_1MIN="./sounds/1.wav"
