@@ -1,9 +1,16 @@
 #!/bin/bash
 
+# Load configuration file
+CONFIG_FILE="./config.sh"
+if [ -f "$CONFIG_FILE" ]; then
+    source "$CONFIG_FILE"
+else
+    echo "Error: Configuration file not found!"
+    exit 1
+fi
+
 current_directory=$(pwd)
 INSTALL_DIR="/usr/local/bin"
-SCRIPT_FILE="sound-timer.sh"
-NEW_COMMAND="stimer"
 
 echo "Making '$SCRIPT_FILE' an executable..."
 chmod +x "$SCRIPT_FILE"
