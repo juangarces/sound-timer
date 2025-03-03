@@ -27,6 +27,5 @@ stimer status
 ```
 
 ## TODO
-* Make logging optional by command.
 * Add optional time interval by command.
 * Add translations.
