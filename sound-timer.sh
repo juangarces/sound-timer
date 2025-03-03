@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Resolve symlinks and get the directory of the original script
+COMMAND_LINK_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+SCRIPT_DIRECTORY="$(dirname "$COMMAND_LINK_PATH")"
+
 import_file() {
     file=$1
     if [ -f "$file" ]; then
@@ -10,8 +14,7 @@ import_file() {
     fi
 }
 
-CONFIG_FILE="./config.sh"
-
+CONFIG_FILE="$SCRIPT_DIRECTORY/config.sh"
 import_file $CONFIG_FILE
 
 show_help() {
@@ -74,9 +77,14 @@ sleep_until_next_minute() {
 log_time() {
     if [[ "$LOGGING_ENABLED" == "true" ]]; then
         tag=$1
-        current_time=$2
-        echo "$tag: $current_time" >> "$LOG_FILE"
+        CURRENT_TIME=$2
+        echo "$tag: $CURRENT_TIME" >> "$LOG_FILE"
     fi
+}
+
+play_sound() {
+    FILE_NAME=$1
+    paplay "$SCRIPT_DIRECTORY/sounds/$FILE_NAME.wav"
 }
 
 start_script() {
@@ -87,18 +95,18 @@ start_script() {
         sleep_until_next_minute
 
         while true; do
-            current_time=$(date)
+            CURRENT_TIME=$(date)
             MINUTE=$(date +%M)
 
             if (( MINUTE % 15 == 0 )); then
-                log_time "15 minutes" "$current_time"
-                paplay "$SOUND_15MIN"
+                log_time "15 minutes" "$CURRENT_TIME"
+                play_sound 15
             elif (( MINUTE % 5 == 0 )); then
-                log_time "5 minutes" "$current_time"
-                paplay "$SOUND_5MIN"
+                log_time "5 minutes" "$CURRENT_TIME"
+                play_sound 5
             else
-                log_time "1 minute" "$current_time"
-                paplay "$SOUND_1MIN"
+                log_time "1 minute" "$CURRENT_TIME"
+                play_sound 1
             fi
 
             sleep_until_next_minute
