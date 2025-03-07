@@ -3,6 +3,7 @@
 # Resolve symlinks and get the directory of the original script
 COMMAND_LINK_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
 SCRIPT_DIRECTORY="$(dirname "$COMMAND_LINK_PATH")"
+CONFIG_FILE="$SCRIPT_DIRECTORY/config.sh"
 
 import_file() {
     file=$1
@@ -14,36 +15,49 @@ import_file() {
     fi
 }
 
-CONFIG_FILE="$SCRIPT_DIRECTORY/config.sh"
 import_file $CONFIG_FILE
 
 show_help() {
-    echo "Usage: $NEW_COMMAND {start|stop|status} [-l] [-h]"
+    echo "Usage: $NEW_COMMAND {start|stop|status} [-l] [-h] [1|5|15...]"
     echo
     echo "Options:"
-    echo "  -l          Enable logging to $LOG_FILE"
+    echo "  -l          Enable logging each interval to $LOG_FILE"
     echo "  -h, --help  Show this help message and exit"
     echo
     echo "Commands:"
-    echo "  start       Start the sound timer"
+    echo "  start       Start the sound timer with 1, 5 and 15 intervals"
     echo "  stop        Stop the sound timer"
     echo "  status      Check if the timer is running"
+    echo
+    echo "Example usage:"
+    echo "  $NEW_COMMAND start 5 15     Start the sound timer with 5 and 15 intervals"
     exit 0
+}
+
+# Initialize all flags to false (0)
+declare -A INTERVALS_SELECTED=( [1]=0 [5]=0 [15]=0 )
+FOUND_INTERVAL=0
+
+check_command_validity() {
+    local command=$1
+    local arg=$2
+
+    if [[ $command != "start" ]]; then
+        echo "Error: $arg is only valid for 'start' command." >&2
+        show_help
+        exit 1
+    fi
 }
 
 parse_options() {
     local command=$1
     shift
 
-    while [[ "$#" -gt 0 ]]; do
-        case $1 in
+    # Loop through command-line arguments
+    for arg in "$@"; do
+        case $arg in
             -l)
-                if [[ $command != "start" ]]; then
-                    echo "Error: -l is only valid for 'start' command." >&2
-                    show_help
-                    exit 1
-                fi
-
+                check_command_validity "$command" "$arg"
                 LOGGING_ENABLED="true"
                 echo "Logging enabled."
                 ;;
@@ -51,14 +65,25 @@ parse_options() {
                 show_help
                 exit 1
                 ;;
+            1|5|15)
+                check_command_validity "$command" "$arg"
+                INTERVALS_SELECTED[$arg]=1
+                FOUND_INTERVAL=1
+                ;;
             *)
-                echo "Unknown option for '$command': $1" >&2
+                echo "Unknown option for '$command': $arg" >&2
                 show_help
                 exit 1
                 ;;
         esac
-        shift
     done
+
+    # if no interval in arguments, then select all
+    if (( FOUND_INTERVAL == 0 )); then
+        INTERVALS_SELECTED[1]=1
+        INTERVALS_SELECTED[5]=1
+        INTERVALS_SELECTED[15]=1
+    fi
 }
 
 check_script_running() {
@@ -98,13 +123,13 @@ start_script() {
             CURRENT_TIME=$(date)
             MINUTE=$(date +%M)
 
-            if (( MINUTE % 15 == 0 )); then
+            if (( INTERVALS_SELECTED[15] && MINUTE % 15 == 0 )); then
                 log_time "15 minutes" "$CURRENT_TIME"
                 play_sound 15
-            elif (( MINUTE % 5 == 0 )); then
+            elif (( INTERVALS_SELECTED[5] && MINUTE % 5 == 0 )); then
                 log_time "5 minutes" "$CURRENT_TIME"
                 play_sound 5
-            else
+            elif (( INTERVALS_SELECTED[1] )); then
                 log_time "1 minute" "$CURRENT_TIME"
                 play_sound 1
             fi
