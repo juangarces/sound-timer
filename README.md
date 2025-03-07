@@ -13,9 +13,13 @@ Run installation script inside directory:
 That's it!
 
 ## Usage
-To get a voice counting every 1, 5 and 15 minutes run this new command in your terminal:
+To get a voice notification every 1, 5 and 15 minutes run this new command in your terminal:
 ```sh
 stimer start
+```
+You can select time intervals. Example to get voice notification every 5 and 15 minutes:
+```sh
+stimer start 5 15
 ```
 To stop script:
 ```sh
@@ -27,5 +31,4 @@ stimer status
 ```
 
 ## TODO
-* Add optional time interval by command.
 * Add translations.

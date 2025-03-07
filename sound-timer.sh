@@ -25,12 +25,12 @@ show_help() {
     echo "  -h, --help  Show this help message and exit"
     echo
     echo "Commands:"
-    echo "  start       Start the sound timer with 1, 5 and 15 intervals"
-    echo "  stop        Stop the sound timer"
+    echo "  start       Start the Sound Timer with 1, 5 and 15 intervals"
+    echo "  stop        Stop the Sound Timer"
     echo "  status      Check if the timer is running"
     echo
     echo "Example usage:"
-    echo "  $NEW_COMMAND start 5 15     Start the sound timer with 5 and 15 intervals"
+    echo "  $NEW_COMMAND start 5 15     Start the Sound Timer with 5 and 15 intervals"
     exit 0
 }
 
@@ -193,6 +193,10 @@ case $1 in
         status_script
         ;;
     -h|--help)
+        show_help
+        ;;
+    -l)
+        echo "$1 only works with subcommand 'start'"
         show_help
         ;;
     *)
