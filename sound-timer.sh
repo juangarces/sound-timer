@@ -35,8 +35,8 @@ show_help() {
 }
 
 # Initialize all flags to false (0)
-declare -A INTERVALS_SELECTED=( [1]=0 [5]=0 [15]=0 )
-FOUND_INTERVAL=0
+declare -A intervals_selected=( [1]=0 [5]=0 [15]=0 )
+found_interval=0
 
 check_command_validity() {
     local command=$1
@@ -58,7 +58,7 @@ parse_options() {
         case $arg in
             -l)
                 check_command_validity "$command" "$arg"
-                LOGGING_ENABLED="true"
+                logging_enabled="true"
                 echo "Logging enabled."
                 ;;
             -h|--help)
@@ -67,8 +67,8 @@ parse_options() {
                 ;;
             1|5|15)
                 check_command_validity "$command" "$arg"
-                INTERVALS_SELECTED[$arg]=1
-                FOUND_INTERVAL=1
+                intervals_selected[$arg]=1
+                found_interval=1
                 ;;
             *)
                 echo "Unknown option for '$command': $arg" >&2
@@ -79,10 +79,10 @@ parse_options() {
     done
 
     # if no interval in arguments, then select all
-    if (( FOUND_INTERVAL == 0 )); then
-        INTERVALS_SELECTED[1]=1
-        INTERVALS_SELECTED[5]=1
-        INTERVALS_SELECTED[15]=1
+    if (( found_interval == 0 )); then
+        intervals_selected[1]=1
+        intervals_selected[5]=1
+        intervals_selected[15]=1
     fi
 }
 
@@ -96,20 +96,21 @@ check_script_running() {
 sleep_until_next_minute() {
     # Wait until the next full minute (X:XX:00)
     current_second=$(date +%S)
+    current_second=$((current_second)) # converts to decimal
     sleep $((60 - current_second))		
 }
 
 log_time() {
-    if [[ "$LOGGING_ENABLED" == "true" ]]; then
-        tag=$1
-        CURRENT_TIME=$2
-        echo "$tag: $CURRENT_TIME" >> "$LOG_FILE"
+    if [[ "$logging_enabled" == "true" ]]; then
+        local tag=$1
+        local current_time=$2
+        echo "$tag: $current_time" >> "$LOG_FILE"
     fi
 }
 
 play_sound() {
-    FILE_NAME=$1
-    paplay "$SCRIPT_DIRECTORY/sounds/$FILE_NAME.wav"
+    local file_name=$1
+    paplay "$SCRIPT_DIRECTORY/sounds/$file_name.wav"
 }
 
 start_script() {
@@ -120,17 +121,18 @@ start_script() {
         sleep_until_next_minute
 
         while true; do
-            CURRENT_TIME=$(date)
-            MINUTE=$(date +%M)
+            local current_time=$(date)
+            minute=$(date +%M)
+            minute=$((minute)) # Converts to decimal
 
-            if (( INTERVALS_SELECTED[15] && MINUTE % 15 == 0 )); then
-                log_time "15 minutes" "$CURRENT_TIME"
+            if (( intervals_selected[15] && minute % 15 == 0 )); then
+                log_time "15 minutes" "$current_time"
                 play_sound 15
-            elif (( INTERVALS_SELECTED[5] && MINUTE % 5 == 0 )); then
-                log_time "5 minutes" "$CURRENT_TIME"
+            elif (( intervals_selected[5] && minute % 5 == 0 )); then
+                log_time "5 minutes" "$current_time"
                 play_sound 5
-            elif (( INTERVALS_SELECTED[1] )); then
-                log_time "1 minute" "$CURRENT_TIME"
+            elif (( intervals_selected[1] )); then
+                log_time "1 minute" "$current_time"
                 play_sound 1
             fi
 

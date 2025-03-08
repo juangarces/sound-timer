@@ -11,5 +11,5 @@ SCRIPT_FILE="sound-timer.sh"
 PID_FILE="/tmp/sound-timer.pid"
 LOG_FILE="/tmp/sound-timer.log"
 
-LOGGING_ENABLED="false"
+logging_enabled="false"
 
