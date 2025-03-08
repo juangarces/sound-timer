@@ -96,7 +96,7 @@ check_script_running() {
 sleep_until_next_minute() {
     # Wait until the next full minute (X:XX:00)
     current_second=$(date +%S)
-    current_second=$((current_second + 0)) # converts to decimal
+    current_second=$((10#$current_second)) # converts to decimal
     sleep $((60 - current_second))		
 }
 
@@ -123,7 +123,7 @@ start_script() {
         while true; do
             local current_time=$(date)
             minute=$(date +%M)
-            minute=$((minute + 0)) # Converts to decimal
+            minute=$((10#$minute)) # Converts to decimal
 
             if (( intervals_selected[15] && minute % 15 == 0 )); then
                 log_time "15 minutes" "$current_time"
