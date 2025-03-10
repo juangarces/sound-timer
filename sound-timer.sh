@@ -18,21 +18,21 @@ import_file() {
 import_file $CONFIG_FILE
 
 show_help() {
-	echo "Usage: $NEW_COMMAND {start|stop|status} [-h] [1|5|15...] [-a=<seconds>] [-l]"
-	echo
-	echo "Options:"
-	echo "	-a, --advance	Specify seconds to advance notification"
-	echo "	-l				Enable logging each interval to $LOG_FILE"
-	echo "	-h, --help		Show this help message and exit"
-	echo
-	echo "Commands:"
-	echo "	start		Start the Sound Timer with 1, 5 and 15 intervals"
-	echo "	stop		Stop the Sound Timer"
-	echo "	status		Check if the timer is running"
-	echo
-	echo "Example usage:"
-	echo "	$NEW_COMMAND start 5 15		Start the Sound Timer with 5 and 15 intervals"
-	exit 0
+    echo "Usage: $NEW_COMMAND {start|stop|status} [-h] [1|5|15...] [-a=<seconds>] [-l]"
+    echo
+    echo "Options:"
+    echo "    -a, --advance   Specify seconds to advance notification"
+    echo "    -l              Enable logging each interval to $LOG_FILE"
+    echo "    -h, --help      Show this help message and exit"
+    echo
+    echo "Commands:"
+    echo "    start    Start the Sound Timer with 1, 5 and 15 intervals"
+    echo "    stop     Stop the Sound Timer"
+    echo "    status   Check if the timer is running"
+    echo
+    echo "Example usage:"
+    echo "    $NEW_COMMAND start 5 15    Start the Sound Timer with 5 and 15 intervals"
+    exit 0
 }
 
 # Initialize all flags to false (0)
@@ -142,7 +142,7 @@ sleep_until_next_minute() {
 		seconds_to_sleep=60
 	fi
 
-	log_message "Current second is $current_second so is going to sleep $seconds_to_sleep"	 
+	log_message "Current second is $current_second so is going to sleep $seconds_to_sleep seconds"	 
 	sleep $((seconds_to_sleep))
 }
 
