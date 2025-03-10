@@ -17,9 +17,13 @@ To get a voice notification every 1, 5 and 15 minutes run this new command in yo
 ```sh
 stimer start
 ```
-You can select time intervals. Example to get voice notification every 5 and 15 minutes:
+Select time intervals. Example to get voice notification every 5 and 15 minutes:
 ```sh
 stimer start 5 15
+```
+To get notification x seconds before time interval.
+```sh
+stimer start -a=10
 ```
 To stop script:
 ```sh
