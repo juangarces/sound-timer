@@ -12,4 +12,4 @@ PID_FILE="/tmp/sound-timer.pid"
 LOG_FILE="/tmp/sound-timer.log"
 
 logging_enabled="false"
-
+advance_seconds=0
