@@ -18,7 +18,7 @@ import_file() {
 import_file $CONFIG_FILE
 
 show_help() {
-    echo "Usage: $NEW_COMMAND {start|stop|status} [-h] [1|5|15...] [-a=<seconds>] [-l]"
+    echo "Usage: $NEW_COMMAND {start|stop|status} [-h] [1|5|15|30|60...] [-a=<seconds>] [-l]"
     echo
     echo "Options:"
     echo "    -a, --advance   Specify seconds to advance notification"
@@ -26,7 +26,7 @@ show_help() {
     echo "    -h, --help      Show this help message and exit"
     echo
     echo "Commands:"
-    echo "    start    Start the Sound Timer with 1, 5 and 15 intervals"
+    echo "    start    Start the Sound Timer with 1, 5, 15, 30 and 60 intervals"
     echo "    stop     Stop the Sound Timer"
     echo "    status   Check if the timer is running"
     echo
@@ -35,8 +35,8 @@ show_help() {
     exit 0
 }
 
-# Initialize all flags to false (0)
-declare -A intervals_selected=( [1]=0 [5]=0 [15]=0 )
+# Initialize all time intervals to false (0)
+declare -A intervals_selected=( [1]=0 [5]=0 [15]=0 [30]=0 [60]=0 )
 found_interval=0
 
 log_message() {
@@ -76,7 +76,7 @@ parse_options() {
 				show_help
 				exit 1
 				;;
-			1|5|15)
+			1|5|15|30|60)
 				check_command_validity "$command" "$arg"
 				intervals_selected[$arg]=1
 				found_interval=1
@@ -117,6 +117,8 @@ parse_options() {
 		intervals_selected[1]=1
 		intervals_selected[5]=1
 		intervals_selected[15]=1
+		intervals_selected[30]=1
+		intervals_selected[60]=1
 	fi
 }
 
@@ -171,7 +173,13 @@ start_script() {
 				minute=$((minute + 1))
 			fi 
 
-			if (( intervals_selected[15] && minute % 15 == 0 )); then
+			if (( intervals_selected[60] && minute % 60 == 0 )); then
+				log_value "60 minutes" "$current_time"
+				play_sound 60
+			elif (( intervals_selected[30] && minute % 30 == 0 )); then
+				log_value "30 minutes" "$current_time"
+				play_sound 30
+			elif (( intervals_selected[15] && minute % 15 == 0 )); then
 				log_value "15 minutes" "$current_time"
 				play_sound 15
 			elif (( intervals_selected[5] && minute % 5 == 0 )); then
