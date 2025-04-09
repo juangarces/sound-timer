@@ -1,21 +1,22 @@
 #!/bin/bash
+# set -x
 
 # Resolve symlinks and get the directory of the original script
 COMMAND_LINK_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
 SCRIPT_DIRECTORY="$(dirname "$COMMAND_LINK_PATH")"
-CONFIG_FILE="$SCRIPT_DIRECTORY/config.sh"
 
-import_file() {
-	file=$1
-	if [ -f "$file" ]; then
-		source "$file"
+FILES_TO_LOAD=("config.sh" "time-zones.sh")
+
+for file in "${FILES_TO_LOAD[@]}"; do
+
+	if [ -f "$SCRIPT_DIRECTORY/$file" ]; then
+		source "$SCRIPT_DIRECTORY/$file"
 	else
-		echo "Error: $file file not found!"
+		echo "Error: $SCRIPT_DIRECTORY/$file file not found!"
 		exit 1
 	fi
-}
 
-import_file $CONFIG_FILE
+done
 
 show_help() {
     echo "Usage: $NEW_COMMAND {start|stop|status} [-h] [1|5|15|30|60...] [-a=<seconds>] [-l]"
@@ -166,6 +167,10 @@ start_script() {
 			local current_time=$(date)
 			minute=$(date +%M)
 			minute=$((10#$minute)) # Converts to decimal
+			# hour=$(date +%H)
+			hour=$(TZ="America/New_York" date +%H)
+			# stimer start -tz=newyork
+			log_value "Current hour" "$hour"
 
 			# if there are seconds decrease still round minute to next interval
 			# so when minute is XX:14:50 notification would be 15 minutes
