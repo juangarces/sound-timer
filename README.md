@@ -40,6 +40,8 @@ stimer status
 ```
 
 ## TODO
+* Add 4 hour timeframe.
+* Fix issue: Once script is running it has to be stopped to change options. Rerun start command with different options should stop current proccess and start it again.
 * Add more useful information with the status.
 * Add more voices.
 * Add translations.
