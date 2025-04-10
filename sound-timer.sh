@@ -19,25 +19,27 @@ for file in "${FILES_TO_LOAD[@]}"; do
 done
 
 show_help() {
-    echo "Usage: $NEW_COMMAND {start|stop|status} [-h] [1|5|15|30|60...] [-a=<seconds>] [-l]"
+    echo "Usage: $NEW_COMMAND {start|stop|status} [-h] [1|5|15|30|60|4h...] [-a=<seconds>] [-tz=<city>] [-l]"
     echo
     echo "Options:"
     echo "    -a, --advance   Specify seconds to advance notification"
     echo "    -l              Enable logging each interval to $LOG_FILE"
     echo "    -h, --help      Show this help message and exit"
+	echo "    -tz             Choose a valid city time zone"
     echo
     echo "Commands:"
-    echo "    start    Start the Sound Timer with 1, 5, 15, 30 and 60 intervals"
+    echo "    start    Start the Sound Timer with 1, 5, 15, 30, 60 minute and 4 hour intervals"
     echo "    stop     Stop the Sound Timer"
     echo "    status   Check if the timer is running"
     echo
     echo "Example usage:"
-    echo "    $NEW_COMMAND start 5 15    Start the Sound Timer with 5 and 15 intervals"
+    echo "    $NEW_COMMAND start 5 15                Start the Sound Timer with 5- and 15-minute intervals"
+    echo "    $NEW_COMMAND start 4h -tz=newyork      Start the Sound Timer with a 4-hour interval using the New York timezone"
     exit 0
 }
 
 # Initialize all time intervals to false (0)
-declare -A intervals_selected=( [1]=0 [5]=0 [15]=0 [30]=0 [60]=0 )
+declare -A intervals_selected=( [1]=0 [5]=0 [15]=0 [30]=0 [60]=0 [4h]=0 )
 found_interval=0
 
 log_message() {
@@ -55,7 +57,7 @@ log_value() {
 	fi
 }
 
-check_command_validity() {
+validate_start_option() {
 	local command=$1
 	local arg=$2
 
@@ -64,6 +66,12 @@ check_command_validity() {
 		show_help
 		exit 1
 	fi
+}
+
+list_timezones() {
+	for city in $(printf "%s\n" "${!timezones[@]}" | sort); do # Sorted alphabetically
+		echo "    $city"
+	done
 }
 
 parse_options() {
@@ -77,8 +85,8 @@ parse_options() {
 				show_help
 				exit 1
 				;;
-			1|5|15|30|60)
-				check_command_validity "$command" "$arg"
+			1|5|15|30|60|4h)
+				validate_start_option "$command" "$arg"
 				intervals_selected[$arg]=1
 				found_interval=1
 				;;
@@ -88,7 +96,7 @@ parse_options() {
 				exit 1
 				;;
 			-a=*|--advance=*)
-				check_command_validity "$command" "$arg"
+				validate_start_option "$command" "$arg"
 				advance_seconds="${arg#*=}"
 
 				# Validate advance_seconds is a number below 60
@@ -100,8 +108,27 @@ parse_options() {
 
 				echo "Notifications will play $advance_seconds seconds before each time interval"
 				;;
+			-tz)
+				echo "Error: $arg requires a valid city name in lowercase without spaces. Example: $arg=newyork" >&2
+				echo "Choose between these valid cities:"
+				list_timezones
+				exit 1
+				;;
+			-tz=*)
+				validate_start_option "$command" "$arg"
+				city="${arg#*=}"
+
+				# Validate city name
+				if [[ -v timezones["$city"] ]]; then
+					echo "${timezones[$city]} timezone"
+				else
+					echo "City name is not valid. Please choose between one of these:"
+					list_timezones
+					exit 1
+				fi
+				;;
 			-l)
-				check_command_validity "$command" "$arg"
+				validate_start_option "$command" "$arg"
 				logging_enabled="true"
 				echo "Logging enabled."
 				;;
@@ -120,6 +147,7 @@ parse_options() {
 		intervals_selected[15]=1
 		intervals_selected[30]=1
 		intervals_selected[60]=1
+		intervals_selected[4h]=1
 	fi
 }
 
@@ -154,6 +182,19 @@ play_sound() {
 	paplay "$SCRIPT_DIRECTORY/sounds/$file_name.wav"
 }
 
+get_hour() {
+	# city variable comes from -tz start command option
+	local timezone="$city"
+	
+	if [[ -z "$timezone" ]]; then
+		hour=$(date +%H)
+	else
+		hour=$(TZ=${timezones[$timezone]} date +%H)
+	fi
+
+	echo "$hour"
+}
+
 start_script() {
 	local advance_seconds=$1
 
@@ -167,10 +208,8 @@ start_script() {
 			local current_time=$(date)
 			minute=$(date +%M)
 			minute=$((10#$minute)) # Converts to decimal
-			# hour=$(date +%H)
-			hour=$(TZ="America/New_York" date +%H)
-			# stimer start -tz=newyork
-			log_value "Current hour" "$hour"
+			hour=$(get_hour)
+			hour=$((10#$hour)) # Converts to decimal
 
 			# if there are seconds decrease still round minute to next interval
 			# so when minute is XX:14:50 notification would be 15 minutes
@@ -178,7 +217,10 @@ start_script() {
 				minute=$((minute + 1))
 			fi 
 
-			if (( intervals_selected[60] && minute % 60 == 0 )); then
+			if [[ -n "${intervals_selected[4h]}" && $(( hour % 4 == 0 && minute % 60 == 0 )) -eq 1 ]]; then
+				log_value "4 hours" "$current_time"
+				play_sound 4h
+			elif (( intervals_selected[60] && minute % 60 == 0 )); then
 				log_value "60 minutes" "$current_time"
 				play_sound 60
 			elif (( intervals_selected[30] && minute % 30 == 0 )); then
@@ -256,7 +298,7 @@ case $1 in
 	-h|--help)
 		show_help
 		;;
-	-l|-a|--advance)
+	-l|-a|--advance|-tz)
 		echo "$1 only works with subcommand 'start'"
 		show_help
 		;;

@@ -1,10 +1,9 @@
 # Sound Timer
-Plays a voice notification every 1, 5, 15, 30 and 60 minutes in your terminal. A simple bash script for linux.
+Plays a voice notification every 1, 5, 15, 30, 60 minutes and every 4 hours. It follows the clock, so notifications happen at the next matching time—like 14:15, 14:30, or 16:00—depending on the interval you choose. Uses your system’s timezone or one you set. A simple Bash script for Linux.
 
 ## Usage scenarios
 * In day trading, if you want to be notified every time a new candle/bar is confirmed in the most commonly used timeframes.
-
-* When you want to set up an exercise routine with a specific duration and receive voice notifications.
+* When you want to set up a workout routine with a specific duration and receive voice notifications.
 
 ## Installation
 Download the repository or clone it using git:
@@ -18,13 +17,13 @@ Run installation script inside directory:
 That's it!
 
 ## Usage
-To get a voice notification every 1, 5, 15, 30 and 60 minutes run this new command in your terminal:
+To get a voice notification every 1, 5, 15, 30, 60 minutes and every 4 hours run this new command in your terminal:
 ```sh
 stimer start
 ```
-Select time intervals. Example to get voice notification every 5 and 15 minutes:
+Select time intervals. Example to get voice notification every 15 minutes and every 4 hours following the New York timezone:
 ```sh
-stimer start 5 15
+stimer start 15 4h -tz=newyork
 ```
 To get notification 10 seconds before time interval.
 ```sh
@@ -40,8 +39,7 @@ stimer status
 ```
 
 ## TODO
-* Add 4 hour timeframe.
-* Fix issue: Once script is running it has to be stopped to change options. Rerun start command with different options should stop current proccess and start it again.
+* Fix issue: Once script is running it has to be stopped to change options.
 * Add more useful information with the status.
 * Add more voices.
 * Add translations.
