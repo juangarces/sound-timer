@@ -211,10 +211,11 @@ start_script() {
 			hour=$(get_hour)
 			hour=$((10#$hour)) # Converts to decimal
 
-			# if there are seconds decrease still round minute to next interval
+			# if there are seconds decrease still round minute and hour to next interval
 			# so when minute is XX:14:50 notification would be 15 minutes
 			if (( advance_seconds > 0 )); then
 				minute=$((minute + 1))
+				hour=$((hour + 1))
 			fi 
 
 			if [[ -n "${intervals_selected[4h]}" && $(( hour % 4 == 0 && minute % 60 == 0 )) -eq 1 ]]; then
